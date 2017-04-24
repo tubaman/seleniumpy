@@ -1,6 +1,7 @@
 import unittest
 
 import seleniumpy
+from selenium.common.exceptions import TimeoutException
 
 
 class WebDriverTestCase(unittest.TestCase):
@@ -39,6 +40,22 @@ class TestDriverWaitFor(WebDriverTestCase):
         self.driver.go("http://example.org")
         h1 = self.driver.wait_for(tag_name="h1", duration=10)
         self.assertEqual(h1.text, "Example Domain")
+
+    def test_wait_for_timeout(self):
+        self.driver.go("http://example.org")
+        with self.assertRaises(TimeoutException):
+            self.driver.wait_for(tag_name="h2", duration=0.250)
+
+
+class TestSelect(WebDriverTestCase):
+
+    def test_select(self):
+        self.driver.go("https://www.w3schools.com/tags/tryit.asp?filename=tryhtml_select")
+        self.driver.switch_to.frame("iframeResult")
+        elem = self.driver.wait_for(tag_name="select")
+        select = seleniumpy.Select(elem)
+        select.select(value='audi')
+        self.assertEqual(select.first_selected_option.get_attribute('value'), 'audi')
 
 
 if __name__ == '__main__':

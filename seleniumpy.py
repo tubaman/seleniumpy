@@ -72,6 +72,9 @@ class WebElement(Finder):
     def __getattr__(self, name):
         return getattr(self.old_element, name)
 
+    def __str__(self):
+        return "<%s>..</%s>" % (self.tag_name, self.tag_name)
+
     def find(self, **kwargs):
         lookup_type, lookup_value = kwargs.items()[0]
         locator = self.LOCATORS[lookup_type]
@@ -83,3 +86,12 @@ class WebElement(Finder):
         locator = self.LOCATORS[lookup_type]
         old_elements = self.old_element.find_elements(locator, lookup_value)
         return [WebElement(e) for e in old_elements]
+
+
+class Select(selenium.webdriver.support.ui.Select):
+
+    def select(self, **kwargs):
+        lookup_type, lookup_value = kwargs.items()[0]
+        method_name = 'select_by_' + lookup_type
+        method = getattr(self, method_name)
+        return method(lookup_value)
