@@ -1,4 +1,19 @@
 import selenium.webdriver
+from selenium.webdriver.support import expected_conditions as EC
+
+
+class Finder(object):
+
+    LOCATORS = {
+        'id': selenium.webdriver.common.by.By.ID,
+        'xpath': selenium.webdriver.common.by.By.XPATH,
+        'link_text': selenium.webdriver.common.by.By.LINK_TEXT,
+        'partial_link_text': selenium.webdriver.common.by.By.PARTIAL_LINK_TEXT,
+        'name': selenium.webdriver.common.by.By.NAME,
+        'tag_name': selenium.webdriver.common.by.By.TAG_NAME,
+        'class_name': selenium.webdriver.common.by.By.CLASS_NAME,
+        'css_selector': selenium.webdriver.common.by.By.CSS_SELECTOR,
+    }
 
 
 class WebDriverLookup(object):
@@ -12,36 +27,10 @@ class WebDriverLookup(object):
 webdriver = WebDriverLookup()
 
 
-class WebDriver(object):
+class WebDriver(Finder):
 
     def __init__(self, *args, **kwargs):
         self.old_driver = self.DRIVER_CLASS(*args, **kwargs)
-
-    def go(self, url):
-        return self.old_driver.get(url)
-
-    def find(self, id=None, name=None, xpath=None, link_text=None,
-             partial_link_text=None, tag_name=None, class_name=None,
-             css_selector=None):
-        if id:
-            old_element = self.old_driver.find_element_by_id(id)
-        elif name:
-            old_element = self.old_driver.find_element_by_name(name)
-        elif xpath:
-            old_element = self.old_driver.find_element_by_xpath(xpath)
-        elif link_text:
-            old_element = self.old_driver.find_element_by_link_text(link_text)
-        elif partial_link_text:
-            old_element = self.old_driver.find_element_by_partial_link_text(partial_link_text)
-        elif tag_name:
-            old_element = self.old_driver.find_element_by_tag_name(tag_name)
-        elif class_name:
-            old_element = self.old_driver.find_element_by_class_name(class_name)
-        elif css_selector:
-            old_element = self.old_driver.find_element_by_css_selector(css_selector)
-        else:
-            raise ValueError("unknown find type")
-        return WebElement(old_element)
 
     def __enter__(self):
         return self
@@ -49,8 +38,33 @@ class WebDriver(object):
     def __exit__(self, exc_type, exc_value, traceback):
         self.old_driver.quit()
 
+    def __getattr__(self, name):
+        return getattr(self.old_driver, name)
 
-class WebElement(object):
+    def go(self, url):
+        self.old_driver.get(url)
+
+    def find(self, **kwargs):
+        lookup_type, lookup_value = kwargs.items()[0]
+        locator = self.LOCATORS[lookup_type]
+        old_element = self.old_driver.find_element(locator, lookup_value)
+        return WebElement(old_element)
+
+    def find_all(self, **kwargs):
+        lookup_type, lookup_value = kwargs.items()[0]
+        locator = self.LOCATORS[lookup_type]
+        old_elements = self.old_driver.find_elements(locator, lookup_value)
+        return [WebElement(e) for e in old_elements]
+
+    def wait_for(self, duration=5, **kwargs):
+        lookup_type, lookup_value = kwargs.items()[0]
+        locator = self.LOCATORS[lookup_type]
+        wait = selenium.webdriver.support.ui.WebDriverWait(self.old_driver, duration)
+        condition = EC.presence_of_element_located((locator, lookup_value))
+        return WebElement(wait.until(condition))
+
+
+class WebElement(Finder):
 
     def __init__(self, element):
         self.old_element = element
@@ -58,25 +72,14 @@ class WebElement(object):
     def __getattr__(self, name):
         return getattr(self.old_element, name)
 
-    def find(self, id=None, name=None, xpath=None, link_text=None,
-             partial_link_text=None, tag_name=None, class_name=None,
-             css_selector=None):
-        if id:
-            old_element = self.old_element.find_element_by_id(id)
-        elif name:
-            old_element = self.old_element.find_element_by_name(name)
-        elif xpath:
-            old_element = self.old_element.find_element_by_xpath(xpath)
-        elif link_text:
-            old_element = self.old_element.find_element_by_link_text(link_text)
-        elif partial_link_text:
-            old_element = self.old_element.find_element_by_partial_link_text(partial_link_text)
-        elif tag_name:
-            old_element = self.old_element.find_element_by_tag_name(tag_name)
-        elif class_name:
-            old_element = self.old_element.find_element_by_class_name(class_name)
-        elif css_selector:
-            old_element = self.old_element.find_element_by_css_selector(css_selector)
-        else:
-            raise ValueError("unknown find type")
+    def find(self, **kwargs):
+        lookup_type, lookup_value = kwargs.items()[0]
+        locator = self.LOCATORS[lookup_type]
+        old_element = self.old_element.find_element(locator, lookup_value)
         return WebElement(old_element)
+
+    def find_all(self, **kwargs):
+        lookup_type, lookup_value = kwargs.items()[0]
+        locator = self.LOCATORS[lookup_type]
+        old_elements = self.old_element.find_elements(locator, lookup_value)
+        return [WebElement(e) for e in old_elements]
