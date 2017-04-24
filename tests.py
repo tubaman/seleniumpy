@@ -7,7 +7,7 @@ from selenium.common.exceptions import TimeoutException
 class WebDriverTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.driver = seleniumpy.webdriver.Firefox()
+        self.driver = seleniumpy.webdriver.Chrome()
 
     def tearDown(self):
         self.driver.quit()
@@ -16,7 +16,7 @@ class WebDriverTestCase(unittest.TestCase):
 class TestDriverContextManager(unittest.TestCase):
 
     def test_context_manager(self):
-        with seleniumpy.webdriver.Firefox() as driver:
+        with seleniumpy.webdriver.Chrome() as driver:
             driver.go("http://example.org")
 
 
@@ -50,12 +50,14 @@ class TestDriverWaitFor(WebDriverTestCase):
 class TestSelect(WebDriverTestCase):
 
     def test_select(self):
-        self.driver.go("https://www.w3schools.com/tags/tryit.asp?filename=tryhtml_select")
-        self.driver.switch_to.frame("iframeResult")
+        # select is broken on some version of Firefox
+        # http://stackoverflow.com/a/42434977
+        self.driver.go("https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select")
         elem = self.driver.wait_for(tag_name="select")
         select = seleniumpy.Select(elem)
-        select.select(value='audi')
-        self.assertEqual(select.first_selected_option.get_attribute('value'), 'audi')
+        self.assertEqual(select.first_selected_option.get_attribute('value'), 'value2')
+        select.select(value='value3')
+        self.assertEqual(select.first_selected_option.get_attribute('value'), 'value3')
 
 
 if __name__ == '__main__':
