@@ -53,11 +53,10 @@ class TestSelect(WebDriverTestCase):
         # select is broken on some version of Firefox
         # http://stackoverflow.com/a/42434977
         self.driver.go("https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select")
-        elem = self.driver.wait_for(tag_name="select")
-        select = seleniumpy.Select(elem)
-        self.assertEqual(select.first_selected_option.get_attribute('value'), 'value2')
+        select = self.driver.wait_for(tag_name="select")
+        self.assertEqual(select.selected_options[0]['value'], 'value2')
         select.select(value='value3')
-        self.assertEqual(select.first_selected_option.get_attribute('value'), 'value3')
+        self.assertEqual(select.selected_options[0]['value'], 'value3')
 
 
 if __name__ == '__main__':

@@ -48,29 +48,39 @@ class WebDriver(Finder):
         lookup_type, lookup_value = kwargs.items()[0]
         locator = self.LOCATORS[lookup_type]
         old_element = self.old_driver.find_element(locator, lookup_value)
-        return WebElement(old_element)
+        return new_element(old_element)
 
     def find_all(self, **kwargs):
         lookup_type, lookup_value = kwargs.items()[0]
         locator = self.LOCATORS[lookup_type]
         old_elements = self.old_driver.find_elements(locator, lookup_value)
-        return [WebElement(e) for e in old_elements]
+        return [new_element(e) for e in old_elements]
 
     def wait_for(self, duration=5, **kwargs):
         lookup_type, lookup_value = kwargs.items()[0]
         locator = self.LOCATORS[lookup_type]
         wait = selenium.webdriver.support.ui.WebDriverWait(self.old_driver, duration)
         condition = EC.presence_of_element_located((locator, lookup_value))
-        return WebElement(wait.until(condition))
+        return new_element(wait.until(condition))
 
 
 class WebElement(Finder):
+
+    MULTI_VALUED_ATTRIBUTES = ('class', 'rel', 'rev', 'accept-charset', 'headers', 'accesskey')
 
     def __init__(self, element):
         self.old_element = element
 
     def __getattr__(self, name):
         return getattr(self.old_element, name)
+
+    def __getitem__(self, key):
+        value = self.old_element.get_attribute(key)
+        if value is None:
+            raise KeyError("attribute '%s' not found" % key)
+        if key in self.MULTI_VALUED_ATTRIBUTES:
+            value = value.split(' ')
+        return value
 
     def __str__(self):
         return "<%s>..</%s>" % (self.tag_name, self.tag_name)
@@ -79,19 +89,48 @@ class WebElement(Finder):
         lookup_type, lookup_value = kwargs.items()[0]
         locator = self.LOCATORS[lookup_type]
         old_element = self.old_element.find_element(locator, lookup_value)
-        return WebElement(old_element)
+        return new_element(old_element)
 
     def find_all(self, **kwargs):
         lookup_type, lookup_value = kwargs.items()[0]
         locator = self.LOCATORS[lookup_type]
         old_elements = self.old_element.find_elements(locator, lookup_value)
-        return [WebElement(e) for e in old_elements]
+        return [new_element(e) for e in old_elements]
 
 
-class Select(selenium.webdriver.support.ui.Select):
+class Select(WebElement):
+
+    def __init__(self, element):
+        super(Select, self).__init__(element)
+        self.old_select = selenium.webdriver.support.ui.Select(element)
+
+    @property
+    def options(self):
+        return [new_element(o) for o in self.old_select.options]
+
+    @property
+    def selected_options(self):
+        return [new_element(o) for o in self.old_select.all_selected_options]
 
     def select(self, **kwargs):
         lookup_type, lookup_value = kwargs.items()[0]
         method_name = 'select_by_' + lookup_type
-        method = getattr(self, method_name)
+        method = getattr(self.old_select, method_name)
         return method(lookup_value)
+
+    def deselect(self, **kwargs):
+        try:
+            lookup_type, lookup_value = kwargs.items()[0]
+        except IndexError:
+            return self.old_select.deselect_all()
+        else:
+            method_name = 'deselect_by_' + lookup_type
+            method = getattr(self.old_select, method_name)
+            return method(lookup_value)
+
+
+def new_element(old_element):
+    if old_element.tag_name == 'select':
+        return Select(old_element)
+    else:
+        return WebElement(old_element)
