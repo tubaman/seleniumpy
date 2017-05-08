@@ -15,6 +15,24 @@ class Finder(object):
         'css_selector': selenium.webdriver.common.by.By.CSS_SELECTOR,
     }
 
+    def find(self, **kwargs):
+        lookup_type, lookup_value = kwargs.items()[0]
+        locator = self.LOCATORS[lookup_type]
+        old_element = self.find_element(locator, lookup_value)
+        return new_element(old_element)
+
+    def find_all(self, **kwargs):
+        lookup_type, lookup_value = kwargs.items()[0]
+        locator = self.LOCATORS[lookup_type]
+        old_elements = self.find_elements(locator, lookup_value)
+        return [new_element(e) for e in old_elements]
+
+    def find_element(self, locator, lookup_value):
+        raise NotImplementedError()
+
+    def find_elements(self, locator, lookup_value):
+        raise NotImplementedError()
+
 
 class WebDriverLookup(object):
 
@@ -44,17 +62,11 @@ class WebDriver(Finder):
     def go(self, url):
         self.old_driver.get(url)
 
-    def find(self, **kwargs):
-        lookup_type, lookup_value = kwargs.items()[0]
-        locator = self.LOCATORS[lookup_type]
-        old_element = self.old_driver.find_element(locator, lookup_value)
-        return new_element(old_element)
+    def find_element(self, locator, lookup_value):
+        return self.old_driver.find_element(locator, lookup_value)
 
-    def find_all(self, **kwargs):
-        lookup_type, lookup_value = kwargs.items()[0]
-        locator = self.LOCATORS[lookup_type]
-        old_elements = self.old_driver.find_elements(locator, lookup_value)
-        return [new_element(e) for e in old_elements]
+    def find_elements(self, locator, lookup_value):
+        return self.old_driver.find_elements(locator, lookup_value)
 
     def wait_for(self, duration=5, **kwargs):
         lookup_type, lookup_value = kwargs.items()[0]
@@ -85,17 +97,11 @@ class WebElement(Finder):
     def __str__(self):
         return "<%s>..</%s>" % (self.tag_name, self.tag_name)
 
-    def find(self, **kwargs):
-        lookup_type, lookup_value = kwargs.items()[0]
-        locator = self.LOCATORS[lookup_type]
-        old_element = self.old_element.find_element(locator, lookup_value)
-        return new_element(old_element)
+    def find_element(self, locator, lookup_value):
+        return self.old_element.find_element(locator, lookup_value)
 
-    def find_all(self, **kwargs):
-        lookup_type, lookup_value = kwargs.items()[0]
-        locator = self.LOCATORS[lookup_type]
-        old_elements = self.old_element.find_elements(locator, lookup_value)
-        return [new_element(e) for e in old_elements]
+    def find_elements(self, locator, lookup_value):
+        return self.old_element.find_elements(locator, lookup_value)
 
 
 class Select(WebElement):
