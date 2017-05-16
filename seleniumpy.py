@@ -56,11 +56,11 @@ class WebDriver(Finder):
     def __exit__(self, exc_type, exc_value, traceback):
         self.old_driver.quit()
 
-    def __getattr__(self, name):
-        return getattr(self.old_driver, name)
-
     def go(self, url):
         self.old_driver.get(url)
+
+    def quit(self):
+        return self.old_driver.quit()
 
     def find_element(self, locator, lookup_value):
         return self.old_driver.find_element(locator, lookup_value)
@@ -83,9 +83,6 @@ class WebElement(Finder):
     def __init__(self, element):
         self.old_element = element
 
-    def __getattr__(self, name):
-        return getattr(self.old_element, name)
-
     def __getitem__(self, key):
         value = self.old_element.get_attribute(key)
         if value is None:
@@ -96,6 +93,10 @@ class WebElement(Finder):
 
     def __str__(self):
         return "<%s>..</%s>" % (self.tag_name, self.tag_name)
+
+    @property
+    def text(self):
+        return self.old_element.text
 
     def find_element(self, locator, lookup_value):
         return self.old_element.find_element(locator, lookup_value)
