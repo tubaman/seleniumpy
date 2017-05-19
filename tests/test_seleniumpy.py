@@ -10,11 +10,11 @@ class TestDriverLookup(unittest.TestCase):
 
     def test_driver_lookup(self):
         obj = seleniumpy.webdriver.Chrome
-        self.assertEquals(obj.DRIVER_CLASS, selenium.webdriver.Chrome)
+        self.assertEqual(obj.DRIVER_CLASS, selenium.webdriver.Chrome)
 
     def test_non_driver_lookup(self):
         obj = seleniumpy.webdriver.support.ui.WebDriverWait
-        self.assertEquals(obj, selenium.webdriver.support.ui.WebDriverWait)
+        self.assertEqual(obj, selenium.webdriver.support.ui.WebDriverWait)
 
 
 class WebDriverTestCase(unittest.TestCase):
