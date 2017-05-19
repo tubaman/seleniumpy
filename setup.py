@@ -14,6 +14,7 @@ requirements = [
 ]
 
 test_requirements = [
+    #'ipython==5.*',
     'mock',
 ]
 

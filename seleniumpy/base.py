@@ -16,13 +16,13 @@ class Finder(object):
     }
 
     def find(self, **kwargs):
-        lookup_type, lookup_value = kwargs.items()[0]
+        lookup_type, lookup_value = list(kwargs.items())[0]
         locator = self.LOCATORS[lookup_type]
         old_element = self.find_element(locator, lookup_value)
         return new_element(old_element)
 
     def find_all(self, **kwargs):
-        lookup_type, lookup_value = kwargs.items()[0]
+        lookup_type, lookup_value = list(kwargs.items())[0]
         locator = self.LOCATORS[lookup_type]
         old_elements = self.find_elements(locator, lookup_value)
         return [new_element(e) for e in old_elements]
@@ -69,7 +69,7 @@ class WebDriver(Finder):
         return self.old_driver.find_elements(locator, lookup_value)
 
     def wait_for(self, duration=5, **kwargs):
-        lookup_type, lookup_value = kwargs.items()[0]
+        lookup_type, lookup_value = list(kwargs.items())[0]
         locator = self.LOCATORS[lookup_type]
         wait = selenium.webdriver.support.ui.WebDriverWait(self.old_driver, duration)
         condition = EC.presence_of_element_located((locator, lookup_value))
