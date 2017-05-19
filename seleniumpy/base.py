@@ -42,6 +42,7 @@ class WebDriverLookup(object):
             return type('WebDriver', (WebDriver,), {'DRIVER_CLASS': obj})
         return obj
 
+
 webdriver = WebDriverLookup()
 
 
@@ -71,14 +72,16 @@ class WebDriver(Finder):
     def wait_for(self, duration=5, **kwargs):
         lookup_type, lookup_value = list(kwargs.items())[0]
         locator = self.LOCATORS[lookup_type]
-        wait = selenium.webdriver.support.ui.WebDriverWait(self.old_driver, duration)
+        wait = selenium.webdriver.support.ui.WebDriverWait(self.old_driver,
+                                                           duration)
         condition = EC.presence_of_element_located((locator, lookup_value))
         return new_element(wait.until(condition))
 
 
 class WebElement(Finder):
 
-    MULTI_VALUED_ATTRIBUTES = ('class', 'rel', 'rev', 'accept-charset', 'headers', 'accesskey')
+    MULTI_VALUED_ATTRIBUTES = ('class', 'rel', 'rev', 'accept-charset',
+                               'headers', 'accesskey')
 
     def __init__(self, element):
         self.old_element = element
