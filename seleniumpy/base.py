@@ -38,7 +38,7 @@ class WebDriverLookup(object):
 
     def __getattr__(self, name):
         obj = getattr(selenium.webdriver, name)
-        if issubclass(obj, selenium.webdriver.remote.webdriver.WebDriver):
+        if hasattr(obj, 'current_url'):
             return type('WebDriver', (WebDriver,), {'DRIVER_CLASS': obj})
         return obj
 
