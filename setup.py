@@ -14,7 +14,7 @@ requirements = [
 ]
 
 test_requirements = [
-    'chromedriver_installer',
+    'mock',
 ]
 
 setup(
