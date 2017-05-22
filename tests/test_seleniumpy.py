@@ -65,6 +65,17 @@ class TestDriverWaitFor(WebDriverTestCase):
         mock_wait = mock_wait_cls.return_value
         mock_wait.until.assert_called_with(mock_ec.return_value)
 
+    @mock.patch('seleniumpy.EC.visibility_of_element_located')
+    @mock.patch('seleniumpy.selenium.webdriver.support.ui.WebDriverWait')
+    def test_wait_for_visible(self, mock_wait_cls, mock_ec):
+        self.driver.go("http://example.org")
+        h1 = self.driver.wait_for(tag_name="h1", duration=10, visible=True)
+        mock_wait_cls.assert_called_with(self.driver.old_driver, 10)
+        mock_ec.assert_called_with((selenium.webdriver.common.by.By.TAG_NAME, 'h1'))
+        mock_wait = mock_wait_cls.return_value
+        mock_wait.until.assert_called_with(mock_ec.return_value)
+
+
 
 if __name__ == '__main__':
     unittest.main()

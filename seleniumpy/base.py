@@ -33,6 +33,20 @@ class Finder(object):
     def find_elements(self, locator, lookup_value):
         raise NotImplementedError()
 
+    def wait_for(self, duration=5, visible=False, **kwargs):
+        lookup_type, lookup_value = list(kwargs.items())[0]
+        locator = self.LOCATORS[lookup_type]
+        wait = self.wait(duration)
+        if visible:
+            ec = EC.visibility_of_element_located
+        else:
+            ec = EC.presence_of_element_located
+        condition = ec((locator, lookup_value))
+        return new_element(wait.until(condition))
+
+    def wait(self, duration):
+        raise NotImplementedError()
+
 
 class WebDriverLookup(object):
 
@@ -69,13 +83,18 @@ class WebDriver(Finder):
     def find_elements(self, locator, lookup_value):
         return self.old_driver.find_elements(locator, lookup_value)
 
-    def wait_for(self, duration=5, **kwargs):
-        lookup_type, lookup_value = list(kwargs.items())[0]
-        locator = self.LOCATORS[lookup_type]
-        wait = selenium.webdriver.support.ui.WebDriverWait(self.old_driver,
+    def wait(self, duration):
+        return selenium.webdriver.support.ui.WebDriverWait(self.old_driver,
                                                            duration)
-        condition = EC.presence_of_element_located((locator, lookup_value))
-        return new_element(wait.until(condition))
+    @property
+    def page_source(self):
+        return self.old_driver.page_source
+
+    def get_cookies(self):
+        return self.old_driver.get_cookies()
+
+    def add_cookie(self, cookie):
+        return self.old_driver.add_cookie(cookie)
 
 
 class WebElement(Finder):
@@ -101,11 +120,22 @@ class WebElement(Finder):
     def text(self):
         return self.old_element.text
 
+    @text.setter
+    def text(self, text):
+        self.old_element.clear()
+        self.old_element.send_keys(text)
+
     def find_element(self, locator, lookup_value):
         return self.old_element.find_element(locator, lookup_value)
 
     def find_elements(self, locator, lookup_value):
         return self.old_element.find_elements(locator, lookup_value)
+
+    def wait(self, duration):
+        return selenium.webdriver.support.ui.WebDriverWait(self.old_element,
+                                                           duration)
+    def click(self):
+        self.old_element.click()
 
 
 class Select(WebElement):
