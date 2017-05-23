@@ -20,7 +20,7 @@ test_requirements = [
 
 setup(
     name='seleniumpy',
-    version='0.2.0',
+    version='0.2.1',
     description="SeleniumPy is a pythonic wrapper around the selenium API",
     long_description=readme + '\n\n' + history,
     author="Ryan Nowakowski",

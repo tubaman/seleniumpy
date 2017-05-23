@@ -137,6 +137,10 @@ class WebElement(Finder):
     def click(self):
         self.old_element.click()
 
+    @property
+    def is_displayed(self):
+        return self.old_element.is_displayed()
+
 
 class Select(WebElement):
 
