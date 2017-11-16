@@ -37,12 +37,14 @@ class Finder(object):
     def find_elements(self, locator, lookup_value):
         raise NotImplementedError()
 
-    def wait_for(self, duration=5, visible=False, **kwargs):
+    def wait_for(self, duration=5, visible=False, clickable=False, **kwargs):
         lookup_type, lookup_value = list(kwargs.items())[0]
         locator = self.LOCATORS[lookup_type]
         wait = self.wait(duration)
         if visible:
             ec = EC.visibility_of_element_located
+        elif clickable:
+            ec = EC.element_to_be_clickable
         else:
             ec = EC.presence_of_element_located
         condition = ec((locator, lookup_value))
