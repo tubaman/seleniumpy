@@ -11,8 +11,12 @@ class Finder(object):
         'partial_link_text': selenium.webdriver.common.by.By.PARTIAL_LINK_TEXT,
         'name': selenium.webdriver.common.by.By.NAME,
         'tag_name': selenium.webdriver.common.by.By.TAG_NAME,
+        'tag': selenium.webdriver.common.by.By.TAG_NAME,
         'class_name': selenium.webdriver.common.by.By.CLASS_NAME,
+        'cls': selenium.webdriver.common.by.By.CLASS_NAME,
+        'klass': selenium.webdriver.common.by.By.CLASS_NAME,
         'css_selector': selenium.webdriver.common.by.By.CSS_SELECTOR,
+        'css': selenium.webdriver.common.by.By.CSS_SELECTOR,
     }
 
     def find(self, **kwargs):
