@@ -102,6 +102,17 @@ class WebDriver(Finder):
     def add_cookie(self, cookie):
         return self.old_driver.add_cookie(cookie)
 
+    def copy_cookies_to_requests_session(self, session):
+        """Copy cookies from selenium webdriver to requests.Session"""
+        cookies = self.get_cookies()
+        for cookie in cookies:
+            session.cookies.set(
+                cookie['name'],
+                cookie['value'],
+                domain=cookie['domain'],
+                path=cookie['path']
+            )
+
 
 class WebElement(Finder):
 
